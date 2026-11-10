@@ -232,7 +232,7 @@ function adStatsHtml(prod,res){
     :res.match>AD.budget?`<b>Zielgruppe zu breit:</b> Auf deine Beschreibung passen ${res.match} Personen, das Budget reichte nur für ${AD.budget} davon. Grenze genauer ein, damit die Anzeigen bei den Richtigen landen.`
     :rest>AD.budget*.3?`<b>Zielgruppe zu eng:</b> Nur ${res.match} Personen passen auf deine Beschreibung, ${rest} € bleiben ungenutzt. Die Trefferquote ist hoch, aber du lässt viele Käufer liegen (offene Ringe). Lockere ein Merkmal.`
     :`<b>Gute Größe:</b> ${res.match} Personen passen, du nutzt fast das ganze Budget. Mehr Käufer bekommst du jetzt nur noch mit passenderen Merkmalen.`;
-  return `<div class="stats">
+  return `<p style="margin:.8rem 0 0"><b>${res.shown} Personen</b> haben deine Anzeige gesehen. <b>${res.hits}</b> davon kaufen das Produkt, <b>${res.shown-res.hits}</b> kaufen trotzdem nicht. In der ganzen Datenbank gibt es ${res.total} Käufer, ${res.total-res.hits} davon hast du nicht erreicht.</p><div class="stats">
     <div class="stat"><b>${res.shown} von ${AD.budget} €</b><span>Budget ausgegeben</span></div>
     <div class="stat"><b>${res.hits} von ${res.total}</b><span>Käufern erreicht</span></div>
     <div class="stat"><b>${res.shown-res.hits}</b><span>Anzeigen umsonst (Streuverlust)</span></div>
@@ -374,7 +374,7 @@ const STAGES=[
   done:()=>S.d.form,hint:'Erst prüfen, dann geht es weiter.'},
  {t:'Experiment: Deine Werbeagentur',
   html:()=>`<p>Firmen bezahlen für Daten, weil sie damit Werbung gezielt schalten können. Je genauer die Werbung zur Zielgruppe passt, desto mehr Käufer erreicht man mit demselben <strong>Werbebudget</strong>. Zielgruppen beschreibt man über <strong>demografische</strong> und <strong>ökonomische Merkmale</strong>.</p>
-  <div class="auftrag"><b>Auftrag</b>Du leitest eine Werbeagentur. In deiner Datenbank stehen 1000 Personen. Jede Anzeige kostet 1 €, dein Budget beträgt 150 €. Du kannst also höchstens 150 Personen erreichen. Beschreibe eine Zielgruppe, in der möglichst viele Käufer stecken, und schalte die Anzeigen. Die offenen Ringe zeigen dir danach, welche Käufer du verpasst hast.
+  <div class="auftrag"><b>Auftrag</b>Du leitest eine Werbeagentur. In deiner Datenbank stehen 1000 Personen. Jede Anzeige kostet 1 €, dein Budget beträgt 150 €. Du kannst also höchstens 150 Personen erreichen. Nicht jeder, der eine Anzeige sieht, kauft auch: Die meisten Menschen brauchen dein Produkt gar nicht. Beschreibe eine Zielgruppe, in der möglichst viele Käufer stecken, und schalte die Anzeigen. Die offenen Ringe zeigen dir danach, welche Käufer du verpasst hast.
    <ul class="checklist" id="cl"></ul></div>
   <div class="two"><div class="panel">
     <label class="row"><b>Produkt</b>${sel('prod',AD.produkte,S.d.ad.prod)}</label>
