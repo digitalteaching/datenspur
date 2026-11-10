@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datenspur – Datenschutz und Datensicherheit</title>
+<style>
+/*CSS-SHARED-START*/
+:root{
+  --paper:#f5f0e6; --card:#fffdf8; --ink:#1b2332; --muted:#5b6474; --line:#d8cfbe;
+  --teal:#0f766e; --teal-soft:#d6ebe7; --stop:#c5301d; --stop-soft:#fbe4df;
+  --gold:#d99a1c; --gold-soft:#f8ebcb; --blue:#2f5fd0; --blue-soft:#dde6fa;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{font-size:17px}
+body{margin:0;background:var(--paper);color:var(--ink);line-height:1.55;
+  font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}
+h1,h2,h3{line-height:1.2;margin:0 0 .5em;text-wrap:balance}
+h1{font-size:2rem;letter-spacing:-.01em}
+h2{font-size:1.3rem}
+h3{font-size:1.02rem}
+p{margin:0 0 .8em}
+.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.5rem;margin:1rem 0}
+.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:1rem}
+.btn{font:inherit;font-weight:650;border:0;border-radius:9px;padding:.6rem 1.15rem;background:var(--teal);color:#fff;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{background:#b9b3a6;cursor:not-allowed;filter:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.small{padding:.35rem .7rem;font-size:.88rem}
+.btn.stop{background:var(--stop)}
+input[type=text],input[type=number],select{font:inherit;padding:.45rem .6rem;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.merke{background:var(--gold-soft);border-left:5px solid var(--gold);border-radius:8px;padding:.8rem 1rem;margin:1rem 0}
+.auftrag{background:var(--teal-soft);border-left:5px solid var(--teal);border-radius:8px;padding:.8rem 1rem;margin:1rem 0}
+.auftrag b:first-child,.merke b:first-child{display:block;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.2rem}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:1rem;align-items:start}
+@media(max-width:800px){.two{grid-template-columns:1fr}}
+.muted{color:var(--muted)} .small{font-size:.88rem}
+.ok{color:var(--teal);font-weight:650} .bad{color:var(--stop);font-weight:650}
+.code{font-family:var(--mono);font-weight:700;letter-spacing:.12em}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem;margin:.8rem 0}
+.stat{background:var(--paper);border-radius:8px;padding:.5rem .7rem}
+.stat b{display:block;font-size:1.4rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.8rem;color:var(--muted)}
+canvas.crowd{width:100%;height:auto;display:block;background:#fff;border-radius:8px}
+.legend{display:flex;flex-wrap:wrap;gap:.3rem 1rem;font-size:.8rem;color:var(--muted);margin-top:.4rem}
+.dot{display:inline-block;width:.7em;height:.7em;border-radius:50%;margin-right:.3em;vertical-align:baseline}
+.chip{font:inherit;font-size:.92rem;background:#fff;border:1.5px solid var(--line);border-radius:7px;padding:.3rem .65rem;cursor:pointer;color:var(--ink)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.zone{border-radius:10px;padding:.7rem;min-height:4.6rem;margin-bottom:.6rem;border:2px dashed transparent}
+.zone h3{margin-bottom:.4rem}
+.zone.z0{background:#f3d2cc} .zone.z1{background:var(--gold-soft)} .zone.z2{background:var(--blue-soft)}
+table.t{border-collapse:collapse;width:100%;font-size:.92rem}
+table.t th,table.t td{border:1px solid var(--line);padding:.4rem .55rem;text-align:left;vertical-align:top}
+table.t th{background:var(--paper)}
+.akte{font-family:var(--mono);font-size:.84rem;background:#1b2332;color:#e9f3f1;border-radius:8px;padding:.8rem;white-space:pre-wrap;line-height:1.45}
+.pill{display:inline-block;border-radius:99px;padding:.1rem .6rem;font-size:.8rem;font-weight:650}
+.pill.ok{background:var(--teal-soft);color:var(--teal)} .pill.part{background:var(--gold-soft);color:#7a5200}
+.pill.lost{background:var(--stop-soft);color:var(--stop)} .pill.wait{background:var(--blue-soft);color:var(--blue)}
+.letters{display:flex;flex-wrap:wrap;gap:.25rem;margin:.5rem 0}
+.letters span{display:grid;place-items:center;min-width:2rem;padding:.15rem .2rem;background:#fff;border:1px solid var(--line);border-radius:6px;font-family:var(--mono);font-weight:700}
+.letters span small{font-weight:400;color:var(--muted);font-size:.72rem}
+/*CSS-SHARED-END*/
+
+header.top{position:sticky;top:0;z-index:5;background:var(--ink);color:#fff;padding:.6rem 1.2rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.brand{font-weight:800;letter-spacing:.18em;font-size:.95rem}
+.brand i{font-style:normal;color:#6fd3c7}
+.rail{display:flex;align-items:center;flex:1;min-width:300px;max-width:640px}
+.rail button{font:inherit;font-weight:700;width:2.1rem;height:2.1rem;border-radius:50%;border:2px solid #56617a;background:transparent;color:#aab3c5;cursor:pointer;flex:none}
+.rail button.done{background:#6fd3c7;border-color:#6fd3c7;color:var(--ink)}
+.rail button.cur{border-color:#fff;color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+.rail button:disabled{cursor:not-allowed;opacity:.55}
+.rail .seg{flex:1;height:2px;background:#56617a}
+.rail .seg.done{background:#6fd3c7}
+.rail .seg.gap{background:none;border-top:2px dotted #56617a;height:0}
+main{max-width:1000px;margin:0 auto;padding:1.4rem 1.2rem 4rem}
+.steps{display:flex;gap:.4rem;margin:.2rem 0 0}
+.steps span{height:5px;flex:1;max-width:70px;border-radius:3px;background:var(--line)}
+.steps span.on{background:var(--teal)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+#navhint{font-size:.88rem;color:var(--muted);text-align:right;flex:1}
+.checklist{list-style:none;padding:0;margin:.3rem 0}
+.checklist li{padding:.15rem 0 .15rem 1.7rem;position:relative}
+.checklist li::before{content:"";position:absolute;left:0;top:.35rem;width:1rem;height:1rem;border:2px solid var(--teal);border-radius:4px;background:#fff}
+.checklist li.done::before{background:var(--teal)}
+.checklist li.done::after{content:"✓";position:absolute;left:.2rem;top:.05rem;color:#fff;font-weight:800;font-size:.85rem}
+label.row{display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin:.35rem 0;font-size:.93rem}
+.grp{border-radius:8px;padding:.6rem .7rem;margin-bottom:.6rem}
+.grp.demo{background:var(--gold-soft)} .grp.oeko{background:var(--blue-soft)}
+.grp h3{margin-bottom:.3rem}
+.formlist label{display:block;padding:.3rem .5rem;border-radius:6px;cursor:pointer}
+.formlist label:hover{background:var(--paper)}
+.tray{display:flex;flex-wrap:wrap;gap:.4rem;min-height:2.6rem;padding:.6rem;border:2px dashed var(--line);border-radius:10px;margin-bottom:.8rem}
+.chip.pick{outline:3px solid var(--blue)} .chip.diff{border-color:var(--stop);border-style:dashed}
+.zone.over{border-color:var(--ink)}
+.case{display:flex;justify-content:space-between;gap:1rem;align-items:center;padding:.55rem 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.case p{margin:0;flex:1;min-width:260px}
+.mail{background:#fff;border:1px solid var(--line);border-radius:10px;padding:1rem;line-height:2.2}
+.mail .hd{border-bottom:1px solid var(--line);margin-bottom:.6rem;padding-bottom:.4rem;color:var(--muted);line-height:2}
+.browser{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.tabs{display:flex;background:#e6dfd0}
+.tabs button{font:inherit;font-size:.88rem;border:0;background:transparent;padding:.5rem .9rem;cursor:pointer;border-right:1px solid var(--line)}
+.tabs button.on{background:#fff;font-weight:700}
+.url{font-family:var(--mono);font-size:.8rem;padding:.35rem .8rem;background:#faf7f0;border-bottom:1px solid var(--line);color:var(--muted)}
+.site{position:relative;min-height:330px;padding:1rem}
+.site .hd{color:#fff;margin:-1rem -1rem 1rem;padding:.8rem 1rem;font-weight:800;font-size:1.15rem}
+.pages{display:grid;gap:.5rem}
+.pages button{font:inherit;text-align:left;padding:.6rem .8rem;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+.pages button.seen{background:var(--paper)}
+.adslot{margin-top:.9rem;border:2px dashed var(--gold);border-radius:8px;padding:.6rem .8rem;font-size:.9rem;background:#fffaf0}
+.banner{position:absolute;inset:0;background:rgba(27,35,50,.72);display:grid;place-items:end center;padding:1rem}
+.banner>div{background:#fff;border-radius:10px;padding:1rem;max-width:420px;text-align:center}
+.banner .big{display:block;width:100%;margin:.5rem 0;font-size:1.05rem;padding:.7rem}
+.banner .tiny{font:inherit;font-size:.78rem;background:none;border:0;color:#8a8a8a;text-decoration:underline;cursor:pointer}
+.stopcard{border:3px solid var(--stop);background:#fff}
+.stophead{display:flex;gap:1.2rem;align-items:center;margin-bottom:1rem}
+.octa{flex:none;width:92px;height:92px;background:var(--stop);color:#fff;display:grid;place-items:center;font-weight:900;letter-spacing:.06em;
+  clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+.bigcode{font-size:2.1rem;background:var(--paper);border-radius:10px;padding:.5rem 1rem;display:inline-block;margin:.2rem 0 .4rem;user-select:all}
+.unlock{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:.5rem}
+.unlock input{font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;width:15rem}
+.log{font-family:var(--mono);font-size:.84rem;background:var(--paper);border-radius:8px;padding:.6rem;min-height:5rem;max-height:11rem;overflow:auto}
+.pin{font-family:var(--mono);font-size:2.4rem;font-weight:700;letter-spacing:.2em}
+footer{max-width:1000px;margin:0 auto;padding:0 1.2rem 2rem;font-size:.8rem;color:var(--muted)}
+footer button{font:inherit;background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;padding:0}
+@media(prefers-reduced-motion:no-preference){.card{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">DATEN<i>SPUR</i></div>
+  <nav class="rail" id="rail" aria-label="Etappen"></nav>
+</header>
+<main id="main"></main>
+<footer>Datenspur · Datenschutz und Datensicherheit · Dein Fortschritt wird nur in diesem Browser gespeichert. <button id="reset">Fortschritt zurücksetzen</button></footer>
+
+<script>
+/*SHARED-START*/
+// ---------- Codes ----------
+const ALPHA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function packBits(fields){let n=0n;for(const [v,b] of fields)n=(n<<BigInt(b))|BigInt(v);return n;}
+function unpackBits(n,sizes){const out=[];for(let i=sizes.length-1;i>=0;i--){const b=BigInt(sizes[i]);out[i]=Number(n&((1n<<b)-1n));n>>=b;}return out;}
+function toChars(n,len){let s='';for(let i=0;i<len;i++){s=ALPHA[Number(n&31n)]+s;n>>=5n;}return s;}
+function fromChars(s){let n=0n;for(const c of s){const i=ALPHA.indexOf(c);if(i<0)return null;n=(n<<5n)|BigInt(i);}return n;}
+function checkChar(str){let h=7;for(const c of str)h=(h*31+c.charCodeAt(0))%997;return ALPHA[h%32];}
+function makeCode(stage,body){return stage+'-'+body+'-'+checkChar(stage+body.replace(/-/g,''));}
+function code1(prod,t){return makeCode(1,toChars(packBits([[prod,2],[t.alter,6],[t.g,2],[t.f,2],[t.w,2],[t.bi,2],[t.ge,2],[t.be,3]]),5));}
+function code2(sph){return makeCode(2,toChars(packBits(sph.map(v=>[v,2])),5));}
+function code3(ch,pg){return makeCode(3,toChars(packBits([[ch[0],2],[ch[1],2],[ch[2],2],[pg,9]]),3));}
+function code4(l,c){return makeCode(4,toChars(packBits([[l,2],[c,2]]),1));}
+function code5(a,b){return makeCode(5,a+'-'+b);}
+function decodeCode(input){
+  const raw=String(input).toUpperCase().trim().replace(/[\s–—_]+/g,'-');
+  const flat=raw.replace(/[^A-Z0-9]/g,'');
+  if(flat.length<3)return{err:'Der Code ist zu kurz.'};
+  if(checkChar(flat.slice(0,-1))!==flat.slice(-1))return{err:'Das Prüfzeichen passt nicht. Bitte den Code noch einmal ansagen lassen.'};
+  const stage=+flat[0];
+  if(stage===5){const p=raw.split('-').filter(Boolean);if(p.length!==4)return{err:'Ein Code der Etappe 5 hat die Form 5-WORT-WORT-X (mit Bindestrichen).'};return{stage,a:p[1],b:p[2]};}
+  const body=flat.slice(1,-1),n=fromChars(body);
+  if(n===null)return{err:'Der Code enthält ungültige Zeichen.'};
+  if(stage===1&&body.length===5){const [prod,alter,g,f,w,bi,ge,be]=unpackBits(n,[2,6,2,2,2,2,2,3]);
+    if(prod>2||g>2||w>2||be>4)return{err:'Der Code ist ungültig.'};return{stage,prod,t:{alter,g,f,w,bi,ge,be}};}
+  if(stage===2&&body.length===5){const sph=unpackBits(n,Array(12).fill(2));if(sph.some(v=>v>2))return{err:'Der Code ist ungültig.'};return{stage,sph};}
+  if(stage===3&&body.length===3){const v=unpackBits(n,[2,2,2,9]);if(v.slice(0,3).some(x=>x>2))return{err:'Der Code ist ungültig.'};return{stage,ch:v.slice(0,3),pg:v[3]};}
+  if(stage===4&&body.length===1){const [l,c]=unpackBits(n,[2,2]);if(l>2||c>2)return{err:'Der Code ist ungültig.'};return{stage,l,c};}
+  return{err:'Diesen Code kenne ich nicht.'};
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+// ---------- Etappe 1: Werbeagentur ----------
+const AD={
+  alter:['14–17','18–24','25–34','35–49','50–64','65+'],
+  g:['egal','männlich','weiblich'],
+  f:['egal','Single','Partnerschaft','Familie mit Kindern'],
+  w:['egal','Stadt','Land'],
+  bi:['egal','Schule','Ausbildung','Studium'],
+  ge:['egal','niedrig','mittel','hoch'],
+  be:['egal','Schule/Studium','angestellt','selbstständig','Rente'],
+  label:{g:'Geschlecht',f:'Familienstatus',w:'Wohnort',bi:'Bildungsstand',ge:'Gehalt',be:'Beruf'},
+  produkte:['Rasenmäher „Grünschnitt 3000“','Gaming-Headset „Donnerohr“','Kinderwagen „Rollmops“'],
+  budget:150
+};
+function rng(seed){let a=seed;return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const POP=(function(){
+  const r=rng(20261110),pick=w=>{let x=r(),i=0;for(;i<w.length-1;i++){if(x<w[i])return i;x-=w[i];}return i;},out=[];
+  for(let i=0;i<1000;i++){
+    const a=pick([.08,.12,.18,.25,.2,.17]),g=1+pick([.5,.5]);
+    const f=1+pick([[.95,.05,0],[.6,.33,.07],[.3,.35,.35],[.15,.25,.6],[.2,.45,.35],[.3,.55,.15]][a]);
+    const w=1+pick([.6,.4]);
+    const be=1+pick([[1,0,0,0],[.55,.4,.05,0],[.08,.77,.15,0],[.01,.82,.17,0],[0,.75,.15,.1],[0,.06,.04,.9]][a]);
+    const bi=1+pick(a===0?[1,0,0]:a===1?[.4,.35,.25]:[.15,.5,.35]);
+    const ge=1+pick(be===1?[.95,.05,0]:be===4?[.45,.45,.1]:[[.45,.45,.1],[.25,.55,.2],[.1,.45,.45]][bi-1]);
+    const p=[
+      Math.min(.9,.006*[.05,.2,1.2,3,4,2.5][a]*(w===2?8:1)*[0,.4,1.5,2.5][f]*[0,.5,1.3,2][ge]),
+      Math.min(.9,.02*[9,8,2.5,.6,.1,.05][a]*(g===1?1.8:1)*(be===1?1.5:1)),
+      Math.min(.9,.012*[.05,2,9,3,.4,.1][a]*[0,.15,3,6][f])
+    ];
+    out.push({a,g,f,w,bi,ge,be,buy:p.map(x=>r()<x)});
+  }
+  return out;
+})();
+const AD_ALL={alter:63,g:0,f:0,w:0,bi:0,ge:0,be:0};
+function adMatch(p,t){return !!(t.alter>>p.a&1)&&(!t.g||t.g===p.g)&&(!t.f||t.f===p.f)&&(!t.w||t.w===p.w)&&(!t.bi||t.bi===p.bi)&&(!t.ge||t.ge===p.ge)&&(!t.be||t.be===p.be);}
+function adResult(prod,t){
+  let match=0,shown=0,hits=0,total=0;const st=[];
+  POP.forEach(p=>{const b=p.buy[prod];if(b)total++;let s=0;
+    if(adMatch(p,t)){match++;if(shown<AD.budget){shown++;s=1;if(b)hits++;}else s=2;}
+    st.push(s);});
+  return{match,shown,hits,total,st};
+}
+function adDescribe(t){
+  const a=AD.alter.filter((_,i)=>t.alter>>i&1);
+  const parts=['Alter: '+(a.length===6?'egal':a.length?a.join(', '):'niemand')];
+  for(const k of ['g','f','w','bi','ge','be'])if(t[k])parts.push(AD.label[k]+': '+AD[k][t[k]]);
+  return parts;
+}
+function drawCrowd(cv,prod,res){
+  const x=cv.getContext('2d'),C=50,cs=cv.width/C;x.clearRect(0,0,cv.width,cv.height);
+  POP.forEach((p,i)=>{const cx=(i%C+.5)*cs,cy=(Math.floor(i/C)+.5)*cs,s=res?res.st[i]:0,b=p.buy[prod];
+    x.beginPath();x.arc(cx,cy,cs*.33,0,6.3);
+    if(s===1&&b){x.fillStyle='#d99a1c';x.fill();}
+    else if(s===1){x.fillStyle='#2f5fd0';x.fill();}
+    else if(b&&res){x.strokeStyle='#d99a1c';x.lineWidth=2.5;x.stroke();}
+    else{x.fillStyle='#ddd5c5';x.fill();}});
+}
+function adStatsHtml(prod,res){
+  const base=adResult(prod,AD_ALL),rest=AD.budget-res.shown;
+  const tipp=!res.match?'Auf diese Beschreibung passt niemand in der Datenbank.'
+    :res.match>AD.budget?`<b>Zielgruppe zu breit:</b> Auf deine Beschreibung passen ${res.match} Personen, das Budget reichte nur für ${AD.budget} davon. Grenze genauer ein, damit die Anzeigen bei den Richtigen landen.`
+    :rest>AD.budget*.3?`<b>Zielgruppe zu eng:</b> Nur ${res.match} Personen passen auf deine Beschreibung, ${rest} € bleiben ungenutzt. Die Trefferquote ist hoch, aber du lässt viele Käufer liegen (offene Ringe). Lockere ein Merkmal.`
+    :`<b>Gute Größe:</b> ${res.match} Personen passen, du nutzt fast das ganze Budget. Mehr Käufer bekommst du jetzt nur noch mit passenderen Merkmalen.`;
+  return `<div class="stats">
+    <div class="stat"><b>${res.shown} von ${AD.budget} €</b><span>Budget ausgegeben</span></div>
+    <div class="stat"><b>${res.hits} von ${res.total}</b><span>Käufern erreicht</span></div>
+    <div class="stat"><b>${res.shown-res.hits}</b><span>Anzeigen umsonst (Streuverlust)</span></div>
+    <div class="stat"><b>${res.shown?Math.round(100*res.hits/res.shown):0} %</b><span>Trefferquote</span></div></div>
+    <p class="small" style="margin:.2rem 0 .5rem">${tipp}</p>
+    <p class="small muted">Zum Vergleich: Ohne Zielgruppe (${AD.budget} Anzeigen an irgendwen) erreicht man ${base.hits} Käufer.</p>`;
+}
+const CROWD_LEGEND=`<div class="legend"><span><i class="dot" style="background:#d99a1c"></i>Anzeige gesehen, kauft</span><span><i class="dot" style="background:#2f5fd0"></i>Anzeige gesehen, kauft nicht</span><span><i class="dot" style="border:2px solid #d99a1c"></i>hätte gekauft, nicht erreicht</span><span><i class="dot" style="background:#ddd5c5"></i>nicht angesprochen</span></div>`;
+
+// ---------- Etappe 2: Sphärenmodell ----------
+const SPH=['Intimsphäre','Privatsphäre','Öffentlichkeitssphäre'];
+const CARDS=['Leserbrief','Kontostand','Parlamentsrede','Kassenbon','Ärztliches Attest','Adresse','Restaurantreservierung','Urlaubsfotos','Lebenslauf','Gesundheitszustand','Bankverbindung','Wohnort'];
+const SPH_TYP=[2,1,2,1,0,1,1,1,1,0,1,1];
+const SPH_STRITTIG=[1,7,8,11];
+
+// ---------- Etappe 3: Cookies ----------
+const SITES=[
+  {name:'Sprintwerk',domain:'www.sprintwerk.example',sub:'Dein Sportshop',color:'#b4451f',pages:[
+    {t:'Laufschuhe „Wolke 7“ ansehen',i:'Laufen',ad:'Laufuhr „Tempo“ – heute 20 % günstiger'},
+    {t:'Fußballtrikots stöbern',i:'Fußball',ad:'Tickets fürs Derby – nur noch wenige Plätze'},
+    {t:'Proteinriegel in den Warenkorb',i:'Muskelaufbau',ad:'Fitnessstudio „Eisenhart“ – Probemonat', g:'will vermutlich abnehmen oder Muskeln aufbauen'}]},
+  {name:'Tagesblick',domain:'www.tagesblick.example',sub:'Nachrichten für dich',color:'#1f4f8f',pages:[
+    {t:'Artikel: Neue Spielkonsole angekündigt',i:'Gaming',ad:'Konsole jetzt vorbestellen'},
+    {t:'Artikel: 10 Tipps gegen Prüfungsstress',i:'Prüfungsstress',ad:'Nachhilfe „Einser-Schmiede“ – erste Stunde gratis',g:'geht vermutlich zur Schule und steht unter Druck'},
+    {t:'Artikel: Führerschein mit 17 – so geht’s',i:'Führerschein',ad:'Fahrschule „Gaspedal“ in deiner Nähe',g:'ist vermutlich 16 oder 17 Jahre alt'}]},
+  {name:'Clipster',domain:'www.clipster.example',sub:'Videos ohne Ende',color:'#6b2fa0',pages:[
+    {t:'Video: Let’s Play – Folge 112',i:'Gaming',ad:'Gaming-Headset „Donnerohr“'},
+    {t:'Video: Schmink-Tutorial für Anfänger',i:'Kosmetik',ad:'Drogerie-Gutschein: 5 € auf Make-up'},
+    {t:'Playlist: Songs gegen Liebeskummer',i:'Liebeskummer',ad:'Dating-App „Herzklopfen“',g:'ist vermutlich gerade unglücklich verliebt'}]}
+];
+const TRACKER_ID='U-48213';
+function trackerProfile(ch,pg){
+  const visits=[],interests=[],guesses=[];
+  SITES.forEach((s,si)=>{if(ch[si]!==1)return;s.pages.forEach((p,pi)=>{if(pg>>(si*3+pi)&1){visits.push({site:s.name,page:p.t,p});
+    if(!interests.includes(p.i))interests.push(p.i);if(p.g)guesses.push(p.g);}});});
+  return{linked:ch.filter(c=>c===1).length,visits,interests,guesses};
+}
+function akteText(ch,pg){
+  const pr=trackerProfile(ch,pg);
+  if(!pr.linked)return'AKTE LEER\n\nKein Tracking-Cookie gesetzt.\nAdSpinne kann dich nicht wiedererkennen.';
+  let s=`AKTE ${TRACKER_ID}\nwiedererkannt auf ${pr.linked} von 3 Seiten\n`;
+  if(!pr.visits.length)return s+'\nNoch keine Inhalte angeklickt.';
+  s+='\nBEOBACHTET:\n'+pr.visits.map(v=>` · ${v.site}: ${v.page}`).join('\n');
+  s+='\n\nINTERESSEN:\n · '+pr.interests.join(', ');
+  if(pr.guesses.length)s+='\n\nSCHLUSSFOLGERUNGEN:\n'+pr.guesses.map(g=>' · '+g).join('\n');
+  return s;
+}
+function cookieJar(ch){
+  const out=[];
+  SITES.forEach((s,i)=>{if(!ch[i])return;
+    out.push({d:s.domain,n:'sitzung',v:'s'+(7341+i*1187),k:'notwendig'});
+    out.push({d:s.domain,n:'cookie_wahl',v:ch[i]===1?'alle':'nur_notwendige',k:'notwendig'});
+    if(ch[i]===1)out.push({d:s.domain,n:'statistik_id',v:'b'+(55021+i*311),k:'Einwilligung'});});
+  if(ch.includes(1))out.push({d:'adspinne.example',n:'tracker_id',v:TRACKER_ID,k:'Einwilligung · Drittanbieter'});
+  return out;
+}
+const CK_WAHL=['nicht besucht','Alle akzeptiert','Nur notwendige'];
+
+// ---------- Etappe 4: Backup ----------
+const BK={local:['kein lokales Backup','monatlich auf eine externe Festplatte','wöchentlich auf eine externe Festplatte'],
+  cloud:['keine Cloud','wöchentlich von Hand in die Cloud','täglich automatisch in die Cloud'],
+  aufwand:{local:['kein Aufwand','einmal ca. 50 € für die Festplatte, 10 Minuten im Monat','einmal ca. 50 € für die Festplatte, 10 Minuten pro Woche'],
+    cloud:['kein Aufwand','meist kostenlos bis wenige GB, 10 Minuten pro Woche','ca. 1–3 € im Monat, läuft von allein']}};
+function backupOutcome(l,c){
+  const L=[null,20,6][l],C=[null,6,1][c];
+  const tage=d=>d<=1?'höchstens den letzten Tag':`die letzten ${d} Tage`;
+  const res=(d,quelle)=>d===null?{status:'lost',text:'Alles weg: Fotos, Spielstände, Nachrichten, Schulaufgaben.'}
+    :{status:d<=1?'ok':'part',text:`Wiederhergestellt aus ${quelle}. Du verlierst ${tage(d)}.`};
+  const best=(L!==null&&(C===null||L<C))?[L,'dem lokalen Backup']:[C,'der Cloud'];
+  const A=res(L===null&&C===null?null:best[0],best[1]);
+  const B=C===null?{status:'lost',text:(L!==null?'Die Festplatte lag neben dem Handy und ist auch weg. ':'')+'Alles weg.'}:res(C,'der Cloud');
+  const Cc=L!==null?res(L,'dem lokalen Backup'):C!==null?{status:'wait',text:'Nichts verloren, aber heute nicht erreichbar. Das Referat morgen früh hältst du ohne deine Folien.'}:res(null);
+  return[
+    {t:'Panne 1: Handy im Bus verloren',s:'Tag 20 des Monats. Mario steigt aus, das Handy bleibt im Bus.',...A},
+    {t:'Panne 2: Einbruch zu Hause',s:'Tag 20. Diebe nehmen Handy, Laptop und alles mit, was auf dem Schreibtisch liegt.',...B},
+    {t:'Panne 3: Handy im Wasser, Cloud gestört',s:'Tag 20. Das Handy fällt ins Waschbecken. Ausgerechnet heute ist der Cloud-Anbieter 24 Stunden nicht erreichbar, und morgen früh ist das Referat.',...Cc}];
+}
+const BK_STATUS={ok:'gerettet',part:'teilweise gerettet',wait:'nicht erreichbar',lost:'verloren'};
+
+// ---------- Etappe 5: Prüfsumme ----------
+function normWort(s){return String(s).toUpperCase().replace(/[^A-Z ]/g,'');}
+function letterSum(s){const vals=[];let sum=0;for(const c of normWort(s)){const v=c===' '?0:c.charCodeAt(0)-64;vals.push([c,v]);sum+=v;}return{vals,sum};}
+function lettersHtml(s){const r=letterSum(s);return `<div class="letters">${r.vals.map(([c,v])=>c===' '?'<span style="visibility:hidden"> </span>':`<span>${c}<small>${v}</small></span>`).join('')}<span style="background:var(--ink);color:#fff;border-color:var(--ink)">Σ<small style="color:#fff">${r.sum}</small></span></div>`;}
+function isAnagram(a,b){const k=s=>normWort(s).replace(/ /g,'').split('').sort().join('');return k(a)===k(b);}
+function sha256(s){
+  const K=[],H=[],isP=n=>{for(let i=2;i*i<=n;i++)if(n%i===0)return false;return true;},frac=x=>((x-Math.floor(x))*4294967296)|0;
+  for(let n=2,i=0;i<64;n++)if(isP(n)){if(i<8)H[i]=frac(Math.pow(n,.5));K[i++]=frac(Math.pow(n,1/3));}
+  const b=[];for(const ch of unescape(encodeURIComponent(s)))b.push(ch.charCodeAt(0));
+  const l=b.length*8;b.push(128);while(b.length%64!==56)b.push(0);
+  for(let i=7;i>=0;i--)b.push(i>3?0:(l>>>(i*8))&255);
+  const w=new Array(64),rr=(x,n)=>(x>>>n)|(x<<(32-n));
+  for(let o=0;o<b.length;o+=64){
+    for(let i=0;i<16;i++)w[i]=(b[o+4*i]<<24)|(b[o+4*i+1]<<16)|(b[o+4*i+2]<<8)|b[o+4*i+3];
+    for(let i=16;i<64;i++){const s0=rr(w[i-15],7)^rr(w[i-15],18)^(w[i-15]>>>3),s1=rr(w[i-2],17)^rr(w[i-2],19)^(w[i-2]>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0;}
+    let [a,bb,c,d,e,f,g,h]=H;
+    for(let i=0;i<64;i++){const S1=rr(e,6)^rr(e,11)^rr(e,25),ch=(e&f)^(~e&g),t1=(h+S1+ch+K[i]+w[i])|0,S0=rr(a,2)^rr(a,13)^rr(a,22),mj=(a&bb)^(a&c)^(bb&c),t2=(S0+mj)|0;
+      h=g;g=f;f=e;e=(d+t1)|0;d=c;c=bb;bb=a;a=(t1+t2)|0;}
+    [a,bb,c,d,e,f,g,h].forEach((v,i)=>H[i]=(H[i]+v)|0);
+  }
+  return H.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('');
+}
+/*SHARED-END*/
+
+// ================= Schüler-Anwendung =================
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const KEY='datenspur-v1';
+const UNLOCK=[4245990466,1286556815,2802763368,3288498482,952476828];
+function wordHash(w){w=w.toUpperCase().replace(/Ä/g,'AE').replace(/Ö/g,'OE').replace(/Ü/g,'UE').replace(/ß/g,'SS').replace(/[^A-Z]/g,'');let h=5381;for(const c of w)h=((h*33)^c.charCodeAt(0))>>>0;return h;}
+const DEF={stage:1,unlocked:1,step:{},d:{
+  form:false,
+  ad:{prod:0,t:{...AD_ALL},runs:0,last:null},
+  sph:Array(12).fill(-1),sphCmp:false,cases:{},
+  rights:{},mail:false,
+  ck:{ch:[0,0,0],pg:0,seen:false,cleared:false,site:0},
+  bk:{l:0,c:0,run:false},
+  cs1:false,cs2:{},cs2ok:false,pair:null,
+  net:[false,false,false,false],rm:[-1,-1,-1,-1,-1,-1],rmok:false,pin:false,strong:false,pw:{len:4,sets:[false,false,true,false]},tfa:false
+}};
+let S;
+function load(){try{const j=JSON.parse(localStorage.getItem(KEY));if(j&&j.d){S=j;S.d=Object.assign({},JSON.parse(JSON.stringify(DEF.d)),j.d);return;}}catch(e){}S=JSON.parse(JSON.stringify(DEF));}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function sel(id,opts,val){return `<select id="${id}">${opts.map((o,i)=>`<option value="${i}"${i===val?' selected':''}>${o}</option>`).join('')}</select>`;}
+
+// ---------- Etappen ----------
+const STAGES=[
+{n:1,kap:'Kapitel 4.1',title:'Daten als Schatz',
+ talk:['Luigi bekommt plötzlich Werbung für Flugreisen. Wie könnten seine Daten dorthin gelangt sein?','Welche Zielgruppe hat bei dir am besten funktioniert, und warum?','Ist gezielte Werbung für dich ein Service oder ein Problem?'],
+ knobel:'Eine Videoplattform wird vor allem von weiblichen, norddeutschen Jugendlichen zwischen 16 und 21 genutzt. Nenne drei Produkte, für die dort verstärkt geworben werden könnte. Und: Notiere fünf Daten über dich, die du für besonders schützenswert hältst.',
+ code:()=>S.d.ad.last?code1(S.d.ad.last.prod,S.d.ad.last.t):null,
+ steps:[
+ {t:'Luigis Anmeldeformular',
+  html:()=>`<p>Luigi lädt gern Handyfotos auf einer Bilderplattform hoch. Für einen Schüleraustausch füllt er ein langes Anmeldeformular aus und postet stolz ein Foto davon mit dem Hashtag #großeReise.</p>
+  <div class="auftrag"><b>Auftrag</b>Auf dem Formular stehen diese Angaben. Hake an, was du für <b style="display:inline;font-size:inherit;letter-spacing:0;text-transform:none">personenbezogene Daten</b> hältst, und klicke auf „Prüfen“.</div>
+  <div class="formlist panel">${['Vor- und Nachname','Geburtsdatum','Adresse','Telefonnummer','Allergien und Krankheiten','Namen der Eltern','Nummer des Reisepasses','Lieblingsessen','Schuhgröße','Hobbys'].map(x=>`<label><input type="checkbox"> ${x}</label>`).join('')}</div>
+  <p style="margin-top:.8rem"><button class="btn" id="chk">Prüfen</button></p><div id="fb"></div>`,
+  mount(el){const show=()=>{const n=$$('.formlist input:checked',el).length;$('#fb',el).innerHTML=`<div class="merke"><b>Merke</b>${S.d.formN!==undefined?`Du hattest ${S.d.formN} von 10 angehakt. `:''}Es sind alle zehn. <strong>Personenbezogene Daten</strong> sind alle Informationen, die direkt mit einer bestimmten Person verknüpft sind. Auch die Schuhgröße gehört dazu, sobald sie neben Luigis Namen steht. <strong>Datenschutz</strong> heißt: Solche Daten werden rechtlich vor Missbrauch geschützt.</div>
+   <p>Einige Tage später bekommt Luigi per E-Mail und sogar per Post Werbung für Flugreisen. Überlege schon einmal: Was könnte passiert sein?</p>`;};
+   $('#chk',el).onclick=()=>{if(!S.d.form)S.d.formN=$$('.formlist input:checked',el).length;S.d.form=true;show();nav();};if(S.d.form)show();},
+  done:()=>S.d.form,hint:'Erst prüfen, dann geht es weiter.'},
+ {t:'Experiment: Deine Werbeagentur',
+  html:()=>`<p>Firmen bezahlen für Daten, weil sie damit Werbung gezielt schalten können. Je genauer die Werbung zur Zielgruppe passt, desto mehr Käufer erreicht man mit demselben <strong>Werbebudget</strong>. Zielgruppen beschreibt man über <strong>demografische</strong> und <strong>ökonomische Merkmale</strong>.</p>
+  <div class="auftrag"><b>Auftrag</b>Du leitest eine Werbeagentur. In deiner Datenbank stehen 1000 Personen. Jede Anzeige kostet 1 €, dein Budget beträgt 150 €. Du kannst also höchstens 150 Personen erreichen. Beschreibe eine Zielgruppe, in der möglichst viele Käufer stecken, und schalte die Anzeigen. Die offenen Ringe zeigen dir danach, welche Käufer du verpasst hast.
+   <ul class="checklist" id="cl"></ul></div>
+  <div class="two"><div class="panel">
+    <label class="row"><b>Produkt</b>${sel('prod',AD.produkte,S.d.ad.prod)}</label>
+    <div class="grp demo"><h3>Demografische Merkmale</h3>
+      <div class="small">Alter</div><div class="chips" id="alter">${AD.alter.map((a,i)=>`<button class="chip${S.d.ad.t.alter>>i&1?' on':''}" data-i="${i}">${a}</button>`).join('')}</div>
+      ${['g','f','w'].map(k=>`<label class="row">${AD.label[k]}${sel('t_'+k,AD[k],S.d.ad.t[k])}</label>`).join('')}</div>
+    <div class="grp oeko"><h3>Ökonomische Merkmale</h3>
+      ${['bi','ge','be'].map(k=>`<label class="row">${AD.label[k]}${sel('t_'+k,AD[k],S.d.ad.t[k])}</label>`).join('')}</div>
+    <button class="btn" id="run" style="width:100%">Anzeigen schalten</button>
+  </div><div class="panel"><canvas class="crowd" id="cv" width="1000" height="400"></canvas>${CROWD_LEGEND}<div id="res"><p class="muted small" style="margin-top:.8rem">Noch keine Kampagne gestartet. Jeder Punkt ist eine Person aus deiner Datenbank.</p></div></div></div>`,
+  mount(el){const A=S.d.ad,cv=$('#cv',el);
+   const cl=()=>{const base=adResult(A.prod,AD_ALL).hits,last=A.last?adResult(A.last.prod,A.last.t):null;
+    $('#cl',el).innerHTML=`<li class="${A.runs>=2?'done':''}">Probiere mindestens zwei verschiedene Zielgruppen aus.</li><li class="${A.star?'done':''}">Erreiche bei diesem Produkt mindestens ${2*base} Käufer. Ohne Zielgruppe wären es nur ${base}.</li><li class="${A.prods&&A.prods.length>=2?'done':''}">Teste ein zweites Produkt. Passt dieselbe Zielgruppe?</li>`;};
+   const show=()=>{if(A.last&&A.last.prod===A.prod){const r=adResult(A.last.prod,A.last.t);drawCrowd(cv,A.prod,r);$('#res',el).innerHTML=adStatsHtml(A.prod,r);}else{drawCrowd(cv,A.prod,null);}};
+   $('#prod',el).onchange=e=>{A.prod=+e.target.value;drawCrowd(cv,A.prod,null);$('#res',el).innerHTML='<p class="muted small" style="margin-top:.8rem">Neues Produkt. Schalte die Anzeigen.</p>';cl();save();};
+   $$('#alter .chip',el).forEach(b=>b.onclick=()=>{A.t.alter^=1<<+b.dataset.i;b.classList.toggle('on');save();});
+   for(const k of ['g','f','w','bi','ge','be'])$('#t_'+k,el).onchange=e=>{A.t[k]=+e.target.value;save();};
+   $('#run',el).onclick=()=>{A.runs++;A.last={prod:A.prod,t:{...A.t}};const r=adResult(A.prod,A.t),base=adResult(A.prod,AD_ALL);
+    if(r.hits>=2*base.hits)A.star=true;A.prods=A.prods||[];if(!A.prods.includes(A.prod))A.prods.push(A.prod);show();cl();nav();};
+   cl();show();},
+  done:()=>S.d.ad.runs>=2,hint:'Probiere mindestens zwei Zielgruppen aus.'}
+ ]},
+{n:2,kap:'Kapitel 4.1',title:'Das Sphärenmodell',
+ talk:['Bei welchen Karten warst du unsicher?','Kann dieselbe Information in verschiedene Sphären gehören?','Helene verliert ihre Hausaufgaben. Warum ist das kein Fall für den Datenschutz?'],
+ knobel:'Ali bestellt eine Jacke im Internet. Welche Daten werden beim Kauf abgefragt? Und welche Personen, Firmen oder Institutionen außer dem Shop verarbeiten einen Teil seiner Daten?',
+ code:()=>S.d.sph.every(v=>v>=0)?code2(S.d.sph):null,
+ steps:[
+ {t:'Experiment: Wohin gehört was?',
+  html:()=>`<p>Daten sind unterschiedlich privat und deshalb unterschiedlich schützenswert. Das <strong>Sphärenmodell</strong> ordnet sie in drei Bereiche: Die <strong>Intimsphäre</strong> ist am stärksten geschützt (zum Beispiel Tagebucheinträge). Die <strong>Privatsphäre</strong> umfasst, was man nicht öffentlich haben möchte (Familie, Haushalt). Die <strong>Öffentlichkeitssphäre</strong> enthält alles, was man bewusst nach außen trägt (Bühnenauftritt, Kleinanzeige).</p>
+  <div class="auftrag"><b>Auftrag</b>Ordne alle zwölf Karten einer Sphäre zu: Karte anklicken, dann die Sphäre anklicken (oder ziehen). Ein Klick auf eine einsortierte Karte holt sie zurück.</div>
+  <div class="two" style="grid-template-columns:minmax(0,1fr) minmax(0,2.2fr)"><div>
+   <svg viewBox="0 0 200 200" style="width:100%;max-width:240px;display:block;margin:auto" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="#dde6fa"/><circle cx="100" cy="100" r="66" fill="#f8ebcb"/><circle cx="100" cy="100" r="36" fill="#f3d2cc"/><circle cx="100" cy="92" r="9" fill="#1b2332"/><path d="M82 120q18-22 36 0z" fill="#1b2332"/><text x="100" y="18" text-anchor="middle" font-size="9" fill="#1b2332">Öffentlichkeit</text><text x="100" y="48" text-anchor="middle" font-size="9" fill="#1b2332">Privat</text><text x="100" y="76" text-anchor="middle" font-size="8" fill="#1b2332">Intim</text></svg>
+   <div id="cmp" style="margin-top:.8rem"></div></div>
+  <div><div class="tray" id="tray"></div>${SPH.map((s,z)=>`<div class="zone z${z}" data-z="${z}"><h3>${s}</h3><div class="chips"></div></div>`).join('')}</div></div>`,
+  mount(el){let pick=-1;const d=S.d;
+   const place=(i,z)=>{d.sph[i]=z;pick=-1;draw();nav();};
+   const draw=()=>{$('#tray',el).innerHTML='';$$('.zone .chips',el).forEach(c=>c.innerHTML='');
+    CARDS.forEach((c,i)=>{const b=document.createElement('button');b.className='chip'+(pick===i?' pick':'')+(d.sphCmp&&d.sph[i]>=0&&d.sph[i]!==SPH_TYP[i]?' diff':'');b.textContent=c;b.draggable=true;
+     b.ondragstart=e=>{e.dataTransfer.setData('text/plain',i);};
+     b.onclick=e=>{e.stopPropagation();if(d.sph[i]>=0){place(i,-1);}else{pick=pick===i?-1:i;draw();}};
+     (d.sph[i]<0?$('#tray',el):$(`.zone[data-z="${d.sph[i]}"] .chips`,el)).appendChild(b);});
+    if(d.sph.every(v=>v>=0)&&!$('#tray',el).children.length)$('#tray',el).innerHTML='<span class="ok">Alle Karten einsortiert.</span>';
+    const all=d.sph.every(v=>v>=0),n=d.sph.filter((v,i)=>v!==SPH_TYP[i]).length;
+    $('#cmp',el).innerHTML=!all?'':!d.sphCmp?'<button class="btn small" id="docmp">Mit einer typischen Einordnung vergleichen</button>':
+     `<p class="small">${n?`<b>${n} Karte${n>1?'n':''}</b> hast du anders einsortiert als die typische Einordnung (gestrichelt markiert). Das ist nicht automatisch falsch.`:'Deine Einordnung entspricht der typischen.'} Bei Kontostand, Urlaubsfotos, Lebenslauf und Wohnort kommt es auf die Situation an. Überlege dir eine Begründung für das Gespräch.</p>`;
+    const bt=$('#docmp',el);if(bt)bt.onclick=()=>{d.sphCmp=true;draw();save();};};
+   $$('.zone',el).forEach(z=>{z.onclick=()=>{if(pick>=0)place(pick,+z.dataset.z);};
+    z.ondragover=e=>{e.preventDefault();z.classList.add('over');};z.ondragleave=()=>z.classList.remove('over');
+    z.ondrop=e=>{e.preventDefault();z.classList.remove('over');const i=+e.dataTransfer.getData('text/plain');if(i>=0&&i<12)place(i,+z.dataset.z);};});
+   draw();},
+  done:()=>S.d.sph.every(v=>v>=0),hint:'Ordne alle zwölf Karten zu.'},
+ {t:'Datenschutz oder Datensicherheit?',
+  html:()=>`<p>Helene macht ihre Hausaufgaben auf einem alten Laptop. Abends will sie sie hochladen, doch der Computer reagiert nicht mehr: Alle Daten sind verloren. Mit Datenschutz hat das nichts zu tun. Es geht um <strong>Datensicherheit</strong>: technische Maßnahmen, damit Daten dauerhaft sicher gespeichert und nur für Berechtigte zugänglich sind.</p>
+  <div class="auftrag"><b>Auftrag</b>Entscheide bei jedem Fall: Geht es um Datenschutz (rechtlicher Schutz vor Missbrauch) oder um Datensicherheit (technischer Schutz)?</div>
+  <div id="cases"></div>
+  <div class="merke"><b>Merke</b><strong>Datenschutz</strong> ist der rechtliche Schutz personenbezogener Daten vor Missbrauch. <strong>Datensicherheit</strong> sind technische Maßnahmen, die Unversehrtheit und Verfügbarkeit von Daten sicherstellen und den Zugriff kontrollieren.</div>`,
+  mount(el){const C=[['Ein Onlineshop verkauft Luigis Adresse an eine Werbefirma.',0,'Hier werden persönliche Daten missbraucht. Das regelt das Datenschutzrecht.'],
+    ['Eine Schule kopiert jede Nacht alle Dateien auf einen zweiten Server.',1,'Eine technische Maßnahme gegen Datenverlust.'],
+    ['Eine Taschenlampen-App verlangt Zugriff auf alle deine Kontakte.',0,'Die App sammelt persönliche Daten, die sie für ihren Zweck nicht braucht.'],
+    ['Nach einem Stromausfall ist eine Datei beschädigt. Das System bemerkt den Fehler und stellt sie wieder her.',1,'Es geht um die Unversehrtheit der Daten, also um Technik.'],
+    ['Ein Sportverein veröffentlicht ungefragt die Geburtsdaten aller Mitglieder auf seiner Webseite.',0,'Persönliche Daten werden ohne Einwilligung veröffentlicht.'],
+    ['Das Schulnetz verlangt beim Anmelden zusätzlich einen Code vom Handy.',1,'Eine technische Zugriffskontrolle.']];
+   const draw=()=>{$('#cases',el).innerHTML=C.map((c,i)=>{const a=S.d.cases[i];return `<div class="case"><p>${c[0]}${a!==undefined?`<br><span class="${a===c[1]?'ok':'bad'} small">${a===c[1]?'Richtig.':'Nicht ganz.'} ${c[2]}</span>`:''}</p><span><button class="chip${a===0?' on':''}" data-i="${i}" data-a="0">Datenschutz</button> <button class="chip${a===1?' on':''}" data-i="${i}" data-a="1">Datensicherheit</button></span></div>`;}).join('');
+    $$('#cases button',el).forEach(b=>b.onclick=()=>{S.d.cases[b.dataset.i]=+b.dataset.a;draw();nav();});};
+   draw();},
+  done:()=>Object.keys(S.d.cases).length>=6,hint:'Entscheide alle sechs Fälle.'}
+ ]},
+{n:3,kap:'Kapitel 4.2',title:'Deine Rechte und die Cookies',
+ talk:['Was ist der Unterschied zwischen „Account deaktivieren“ und „Daten löschen“?','Was wusste AdSpinne nach deinem ersten Durchgang über dich, und woher?','Warum ist der Knopf „Alle akzeptieren“ meistens größer und bunter?'],
+ knobel:'Falls ihr Internet habt: Öffne eine dir bekannte Webseite in einem privaten Fenster (Inkognito) und sieh dir das Cookie-Banner genau an. Welche Cookies sind technisch notwendig, für welche wird deine Einwilligung verlangt? Ohne Internet: Liste fünf Unternehmen oder Behörden auf, die Daten über dich gespeichert haben.',
+ code:()=>S.d.ck.ch.some(c=>c)?code3(S.d.ck.ch,S.d.ck.pg):null,
+ steps:[
+ {t:'Betroffenenrechte der DSGVO',
+  html:()=>`<p>Hannah hat ihren Account bei einem Onlinespiel deaktiviert. Trotzdem bekommt sie ständig E-Mails, sie solle zurückkommen. Seit 2018 gilt in der ganzen EU die <strong>Datenschutz-Grundverordnung (DSGVO)</strong>. Sie gibt dir als betroffener Person Rechte:</p>
+  <table class="t"><tr><th>Recht auf Auskunft</th><th>Recht auf Berichtigung</th><th>Recht auf Löschung</th></tr><tr><td>Unternehmen und Behörden müssen dir auf Anfrage offenlegen, welche Daten sie über dich gespeichert haben.</td><td>Sind falsche Informationen gespeichert, kannst du sie korrigieren lassen.</td><td>Du kannst verlangen, dass alle Daten über dich gelöscht werden. Ausnahme: Daten, die aus rechtlichen oder vertraglichen Gründen gebraucht werden.</td></tr></table>
+  <div class="auftrag"><b>Auftrag 1</b>Welches Recht passt?</div><div id="rights"></div>
+  <div class="auftrag"><b>Auftrag 2</b>Hilf Hannah: Vervollständige ihre E-Mail an den Spielehersteller so, dass sie wirklich alle Daten loswird.</div>
+  <div class="mail"><div class="hd">An: support@cooleinformatikspiele.de<br>Betreff: ${sel('m0',['bitte wählen','Deaktivierung meines Accounts','Löschung meiner Daten','Beschwerde über zu viele E-Mails'],0)}</div>
+   Sehr geehrte Damen und Herren,<br>im Juni letzten Jahres habe ich mich bei Ihrem Spiel angemeldet. Hiermit mache ich von meinem ${sel('m1',['bitte wählen','Recht auf Auskunft','Recht auf Berichtigung','Recht auf Löschung'],0)} nach der ${sel('m2',['bitte wählen','Hausordnung','DSGVO','Straßenverkehrsordnung'],0)} Gebrauch. Bitte ${sel('m3',['bitte wählen','deaktivieren Sie meinen Account','schicken Sie mir weniger E-Mails','löschen Sie alle zu meiner Person gespeicherten Daten'],0)} und ${sel('m4',['bitte wählen','rufen Sie mich dazu an','bestätigen Sie mir die Löschung schriftlich','schenken Sie mir Spielwährung'],0)}.<br>Mit freundlichen Grüßen<br>Hannah</div>
+  <p style="margin-top:.8rem"><button class="btn" id="send">E-Mail prüfen</button> <span id="mfb"></span></p>`,
+  mount(el){const R=[['Du willst wissen, was ein Onlineshop alles über dich gespeichert hat.',1],['Deine Bank hat dein Geburtsdatum falsch eingetragen.',2],['Du hast eine App verlassen und willst, dass dort nichts von dir übrig bleibt.',3],['Du verlangst vom Finanzamt, die Steuerdaten deiner Familie zu löschen.',4]];
+   const O=['bitte wählen','Auskunft','Berichtigung','Löschung','Geht nicht'];
+   const draw=()=>{$('#rights',el).innerHTML=R.map((r,i)=>{const a=S.d.rights[i]||0;return `<div class="case"><p>${r[0]}${a?` <span class="${a===r[1]?'ok':'bad'} small">${a===r[1]?'Richtig.'+(i===3?' Das Recht auf Löschung gilt nicht, wenn Daten aufgrund gesetzlicher Pflichten verarbeitet werden.':''):'Überlege noch einmal.'}</span>`:''}</p>${sel('r'+i,O,a)}</div>`;}).join('');
+    R.forEach((r,i)=>$('#r'+i,el).onchange=e=>{S.d.rights[i]=+e.target.value;draw();nav();});};
+   draw();const sol=[2,3,2,3,2];
+   $('#send',el).onclick=()=>{const w=sol.map((s,i)=>+$('#m'+i,el).value===s);const ok=w.every(Boolean);S.d.mail=S.d.mail||ok;
+    sol.forEach((s,i)=>$('#m'+i,el).style.borderColor=w[i]?'var(--teal)':'var(--stop)');
+    $('#mfb',el).innerHTML=ok?'<span class="ok">Abgeschickt. So muss der Hersteller wirklich löschen und nicht nur deaktivieren.</span>':'<span class="bad">Noch nicht eindeutig genug. Sieh dir die rot markierten Stellen an.</span>';nav();};
+   if(S.d.mail){sol.forEach((s,i)=>$('#m'+i,el).value=s);}},
+  done:()=>S.d.mail&&[1,2,3,4].every((r,i)=>S.d.rights[i]===r),hint:'Löse beide Aufträge.'},
+ {t:'Experiment: Das Cookie-Labor',
+  html:()=>`<p>Ein <strong>Cookie</strong> ist eine kleine Textinformation, die eine Webseite in deinem Browser speichert. So erkennt sie dich beim nächsten Besuch wieder. <strong>Technisch notwendige Cookies</strong> (Login, Warenkorb, Sprache, deine Auswahl im Banner) darf eine Seite immer setzen. Für alle anderen, etwa Statistik, eingebundene Videos oder Social-Media-Funktionen, muss sie dich im <strong>Cookie-Banner</strong> um Einwilligung bitten. Heikel wird es, wenn ein Werbenetz auf vielen Seiten eingebunden ist: Es kann dich über sein Cookie überall wiedererkennen.</p>
+  <div class="auftrag"><b>Auftrag</b>Hier siehst du einen Mini-Browser mit drei erfundenen Webseiten. Auf allen ist das Werbenetz „AdSpinne“ eingebunden.
+   <ul class="checklist" id="cl"></ul></div>
+  <div class="two" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)"><div><div class="browser"><div class="tabs" id="tabs"></div><div class="url" id="url"></div><div class="site" id="site"></div></div>
+   <p style="margin-top:.6rem"><button class="btn ghost small" id="clear">Alle Cookies löschen</button></p></div>
+  <div><h3>Cookie-Glas deines Browsers</h3><div id="jar"></div>
+   <h3 style="margin-top:1rem">Was weiß AdSpinne?</h3><div id="akte"><button class="btn small" id="open">Akte öffnen</button></div>
+   <details style="margin-top:1rem" class="small"><summary>Übrigens: Was speichert diese Anwendung wirklich bei dir?</summary><p>Auch die Datenspur merkt sich etwas in deinem Browser, nämlich deinen Fortschritt. Das ist technisch notwendig. So sieht der echte Eintrag aus:</p><div class="akte" id="real" style="max-height:9rem;overflow:auto"></div></details></div></div>`,
+  mount(el){const K=S.d.ck;
+   const cl=()=>{$('#cl',el).innerHTML=`<li class="${K.r1?'done':''}">Besuche alle drei Seiten, klicke überall „Alle akzeptieren“ und sieh dir je zwei Inhalte an.</li><li class="${K.seen?'done':''}">Sieh ins Cookie-Glas und öffne die Akte von AdSpinne. Achte auch auf die Werbung.</li><li class="${K.cleared?'done':''}">Lösche alle Cookies und wiederhole den Besuch mit „Nur technisch notwendige“. Was ändert sich?</li><li class="${K.cleared&&K.ch.every(c=>c)?'done':''}">Stelle zum Schluss ein, was du selbst wählen würdest. Dieser Stand landet in deinem Code.</li>`;};
+   const side=()=>{const j=cookieJar(K.ch);$('#jar',el).innerHTML=j.length?`<table class="t small"><tr><th>Cookie</th><th>Art</th></tr>${j.map(c=>`<tr><td><span class="muted">${c.d}</span><br><span style="font-family:var(--mono);overflow-wrap:anywhere">${c.n}=${c.v}</span></td><td>${c.k}</td></tr>`).join('')}</table>`:'<p class="muted small">Das Glas ist leer.</p>';
+    if(K.seen)$('#akte',el).innerHTML=`<div class="akte">${esc(akteText(K.ch,K.pg))}</div>`;
+    try{$('#real',el).textContent=localStorage.getItem(KEY)||'(nichts gespeichert)';}catch(e){$('#real',el).textContent='(Speicher nicht verfügbar)';}
+    const full=K.ch.every(c=>c===1)&&[0,1,2].every(si=>[0,1,2].filter(pi=>K.pg>>(si*3+pi)&1).length>=2);if(full)K.r1=true;cl();nav();};
+   const site=()=>{const s=SITES[K.site],c=K.ch[K.site];
+    $('#tabs',el).innerHTML=SITES.map((x,i)=>`<button class="${i===K.site?'on':''}" data-i="${i}">${x.name}</button>`).join('');
+    $$('#tabs button',el).forEach(b=>b.onclick=()=>{K.site=+b.dataset.i;site();});
+    $('#url',el).textContent='https://'+s.domain;
+    const pr=trackerProfile(K.ch,K.pg),lastAd=c===1&&pr.visits.length?pr.visits[pr.visits.length-1].p.ad:null;
+    $('#site',el).innerHTML=`<div class="hd" style="background:${s.color}">${s.name} <span style="font-weight:400;font-size:.85rem">· ${s.sub}</span></div>
+     <div class="pages">${s.pages.map((p,pi)=>`<button class="${K.pg>>(K.site*3+pi)&1?'seen':''}" data-p="${pi}">${p.t}${K.pg>>(K.site*3+pi)&1?' <span class="muted small">· angesehen</span>':''}</button>`).join('')}</div>
+     <div class="adslot"><span class="muted small">Anzeige von AdSpinne</span><br>${lastAd?`<b>${lastAd}</b> <span class="small">(passend zu dir ausgewählt)</span>`:'Irgendeine Versicherung für irgendwen <span class="small">(nicht personalisiert)</span>'}</div>
+     ${c?'':`<div class="banner"><div><b>Wir schätzen deine Privatsphäre</b><p class="small">Wir und unsere 143 Partner nutzen Cookies, um dir das beste Erlebnis zu bieten.</p><button class="btn big" data-c="1">Alle akzeptieren</button><button class="tiny" data-c="2">Nur technisch notwendige Cookies</button></div></div>`}`;
+    $$('#site .pages button',el).forEach(b=>b.onclick=()=>{K.pg|=1<<(K.site*3+ +b.dataset.p);site();});
+    $$('#site .banner button',el).forEach(b=>b.onclick=()=>{K.ch[K.site]=+b.dataset.c;site();});
+    side();};
+   $('#open',el).onclick=()=>{K.seen=true;side();};
+   $('#clear',el).onclick=()=>{K.ch=[0,0,0];K.pg=0;if(K.r1)K.cleared=true;site();};
+   site();},
+  done:()=>S.d.ck.seen&&S.d.ck.ch.filter(c=>c).length>=2,hint:'Besuche mindestens zwei Seiten und öffne die Akte.'}
+ ]},
+{n:4,kap:'Kapitel 4.3',title:'Verfügbarkeit: Wenn Daten weg sind',
+ talk:['Welche Strategie hast du gewählt, und welche Panne hat dich erwischt?','Warum reicht ein einziges Backup oft nicht?','Wann hast du zuletzt deine eigenen Fotos gesichert?'],
+ knobel:'Denke an ein Internetunternehmen, das du kennst (Webshop, Streamingdienst). Was würde ein Ausfall von 24 Stunden für die Nutzenden bedeuten, was für das Unternehmen? Und: Vergleiche lokale Backups und Cloud-Backups. Notiere je eine Stärke und eine Schwäche.',
+ code:()=>S.d.bk.run?code4(S.d.bk.l,S.d.bk.c):null,
+ steps:[
+ {t:'Experiment: Marios Backup-Plan',
+  html:()=>`<p>Mario hört im Bus Musik. Zu Hause merkt er: Das Smartphone ist weg, mit allen Bildern, Spielständen und Nachrichten. Die <strong>Verfügbarkeit</strong> ist eines der drei <strong>Schutzziele der Datensicherheit</strong>. Dagegen hilft eine regelmäßige <strong>Datensicherung (Backup)</strong>: Die Daten werden <strong>redundant</strong> gespeichert, also mehrfach auf verschiedenen Datenträgern, lokal oder in einer Cloud. Dazu gehört auch die <strong>Erreichbarkeit</strong>: Ein Streamingdienst, der einen Tag ausfällt, hat ein großes Problem.</p>
+  <div class="auftrag"><b>Auftrag</b>Drehe die Zeit zurück und plane Marios Datensicherung. Dann löse die Pannen aus. Du kannst deinen Plan ändern und es noch einmal versuchen. Beachte auch den Aufwand.</div>
+  <div class="two"><div class="panel"><h3>Dein Plan</h3>
+    <label class="row" style="display:block">Lokal<br>${sel('bl',BK.local,S.d.bk.l)}</label><p class="small muted" id="al"></p>
+    <label class="row" style="display:block">Cloud<br>${sel('bc',BK.cloud,S.d.bk.c)}</label><p class="small muted" id="ac"></p>
+    <button class="btn stop" id="go" style="width:100%">Pannen auslösen</button></div>
+   <div id="out"><p class="muted">Noch ist nichts passiert.</p></div></div>`,
+  mount(el){const B=S.d.bk;
+   const aw=()=>{$('#al',el).textContent='Aufwand: '+BK.aufwand.local[B.l];$('#ac',el).textContent='Aufwand: '+BK.aufwand.cloud[B.c];};
+   const out=()=>{$('#out',el).innerHTML=backupOutcome(B.l,B.c).map(o=>`<div class="panel" style="margin-bottom:.6rem"><h3>${o.t} <span class="pill ${o.status}">${BK_STATUS[o.status]}</span></h3><p class="small muted">${o.s}</p><p style="margin:0">${o.text}</p></div>`).join('');};
+   $('#bl',el).onchange=e=>{B.l=+e.target.value;aw();$('#out',el).innerHTML='<p class="muted">Plan geändert. Löse die Pannen erneut aus.</p>';save();};
+   $('#bc',el).onchange=e=>{B.c=+e.target.value;aw();$('#out',el).innerHTML='<p class="muted">Plan geändert. Löse die Pannen erneut aus.</p>';save();};
+   $('#go',el).onclick=()=>{B.run=true;out();nav();};aw();if(B.run)out();},
+  done:()=>S.d.bk.run,hint:'Löse die Pannen mindestens einmal aus.'}
+ ]},
+{n:5,kap:'Kapitel 4.3',title:'Unversehrtheit: Stimmt das noch?',
+ talk:['Wie hast du die Prüfsumme ausgetrickst?','Aus „VIER“ wird „NEUN“, und die Prüfsumme merkt nichts. Was bedeutet das?','Was müsste eine gute Prüfsumme können?'],
+ knobel:'Finde zwei echte deutsche Wörter mit gleicher Prüfsumme, die keine Buchstabendreher voneinander sind. Und: Wo begegnen dir im Alltag Prüfziffern oder Prüfsummen?',
+ code:()=>S.d.pair?code5(S.d.pair[0],S.d.pair[1]):null,
+ steps:[
+ {t:'Die Quersumme eines Wortes',
+  html:()=>`<p>Das zweite Schutzziel ist die <strong>Unversehrtheit</strong>: Gespeicherte Daten sollen unverändert bleiben, egal ob jemand sie versehentlich oder absichtlich verändert (<strong>Modifikation</strong>). Dafür muss ein System Abweichungen erkennen können. Eine einfache Idee ist die <strong>Prüfsumme</strong>: Man berechnet aus den Daten eine Zahl. Ändern sich die Daten, ändert sich auch die Zahl.</p>
+  <p>Unser Verfahren: Jeder Buchstabe bekommt eine Zahl (A→1, B→2, C→3, …, Z→26). Die Werte werden addiert.</p>
+  <div class="auftrag"><b>Auftrag</b>Berechne zuerst selbst, mit Stift oder im Kopf: Welche Prüfsumme hat das Wort DATEN?
+   <p style="margin:.5rem 0 0"><input type="number" id="s" style="width:7rem"> <button class="btn small" id="chk">Prüfen</button> <span id="fb"></span></p></div>
+  <div id="tool"></div>`,
+  mount(el){const tool=()=>{$('#tool',el).innerHTML=`<div class="panel"><h3>Prüfsummen-Rechner</h3><p class="small muted">Ab jetzt rechnet die Maschine. Probiere eigene Wörter aus.</p><input type="text" id="w" value="DATEN" maxlength="30" style="width:100%"><div id="ls"></div></div>`;
+    const u=()=>$('#ls',el).innerHTML=lettersHtml($('#w',el).value);$('#w',el).oninput=u;u();};
+   $('#chk',el).onclick=()=>{const ok=+$('#s',el).value===44;$('#fb',el).innerHTML=ok?'<span class="ok">Richtig: 4 + 1 + 20 + 5 + 14 = 44.</span>':'<span class="bad">Rechne noch einmal nach. D ist der 4. Buchstabe.</span>';if(ok){S.d.cs1=true;tool();nav();}};
+   if(S.d.cs1){$('#s',el).value=44;tool();}},
+  done:()=>S.d.cs1,hint:'Berechne die Prüfsumme von DATEN.'},
+ {t:'Experiment: Manipulation entdecken',
+  html:()=>{const o='TREFFEN UM VIER AM BAHNHOF';return `<p>Du schickst einer Freundin diese Nachricht und teilst ihr auf einem anderen Weg die Prüfsumme mit:</p>
+  <div class="panel"><span class="code">${o}</span> &nbsp; Prüfsumme: <b>${letterSum(o).sum}</b></div>
+  <div class="auftrag"><b>Auftrag</b>Vier Nachrichten kommen an. Lass für jede die Prüfsumme berechnen und entscheide: Ist die Nachricht unverändert oder wurde sie verändert? Lies genau.</div>
+  <div id="msgs"></div><p><button class="btn" id="chk">Auswertung</button></p><div id="fb"></div>`;},
+  mount(el){const o='TREFFEN UM VIER AM BAHNHOF',so=letterSum(o).sum;
+   const M=['TREFFEN UM ACHT AM BAHNHOF','TREFFEN UM VIER AM BAHNHOF','TREFFEN UM NEUN AM BAHNHOF','TREFFEN UM VIER AM BAHNHFO'];const D=S.d.cs2;
+   const draw=()=>{$('#msgs',el).innerHTML=M.map((m,i)=>{const d=D[i]||{};return `<div class="case"><p><span class="code">${m}</span><br>${d.s?`<span class="small">Prüfsumme: <b>${letterSum(m).sum}</b></span>`:`<button class="btn ghost small" data-s="${i}">Prüfsumme berechnen</button>`}</p><span><button class="chip${d.a===0?' on':''}" data-i="${i}" data-a="0">unverändert</button> <button class="chip${d.a===1?' on':''}" data-i="${i}" data-a="1">verändert</button></span></div>`;}).join('');
+    $$('#msgs [data-s]',el).forEach(b=>b.onclick=()=>{D[b.dataset.s]=Object.assign(D[b.dataset.s]||{},{s:1});draw();save();});
+    $$('#msgs [data-a]',el).forEach(b=>b.onclick=()=>{D[b.dataset.i]=Object.assign(D[b.dataset.i]||{},{a:+b.dataset.a});draw();save();});};
+   const fb=()=>{$('#fb',el).innerHTML=`<table class="t"><tr><th>Nachricht</th><th>Prüfsumme</th><th>Tatsächlich</th><th>Deine Antwort</th></tr>${M.map((m,i)=>{const ch=m!==o,s=letterSum(m).sum,a=(D[i]||{}).a;return `<tr><td class="small">${m}</td><td>${s} ${s===so?'(gleich)':'(anders)'}</td><td>${ch?'verändert':'unverändert'}</td><td class="${a===+ch?'ok':'bad'}">${a===+ch?'richtig':'falsch'}</td></tr>`;}).join('')}</table>
+    <div class="merke"><b>Aufgepasst</b>Bei „ACHT“ schlägt die Prüfsumme Alarm. Aber „NEUN“ hat zufällig dieselbe Summe wie „VIER“, und beim Buchstabendreher „BAHNHFO“ ändert sich die Summe ebenfalls nicht. Unser Verfahren erkennt also nicht jede Veränderung.</div>`;};
+   $('#chk',el).onclick=()=>{if(M.some((m,i)=>(D[i]||{}).a===undefined)){$('#fb',el).innerHTML='<p class="bad">Entscheide erst bei allen vier Nachrichten.</p>';return;}S.d.cs2ok=true;fb();nav();};
+   draw();if(S.d.cs2ok)fb();},
+  done:()=>S.d.cs2ok,hint:'Entscheide alle vier und klicke auf „Auswertung“.'},
+ {t:'Experiment: Die Prüfsumme austricksen',
+  html:()=>`<p>Jetzt wechselst du die Seite: Du bist die Person, die Daten unbemerkt verändern will.</p>
+  <div class="auftrag"><b>Auftrag</b>Finde zwei verschiedene Wörter (nur Buchstaben A–Z, höchstens 12) mit derselben Prüfsumme. <ul class="checklist" id="cl"></ul></div>
+  <div class="two" style="grid-template-columns:1fr 1fr"><div class="panel"><input type="text" id="a" maxlength="12" style="width:100%" placeholder="Wort 1"><div id="la"></div></div><div class="panel"><input type="text" id="b" maxlength="12" style="width:100%" placeholder="Wort 2"><div id="lb"></div></div></div>
+  <div id="fb" style="margin-top:.8rem"></div>`,
+  mount(el){const cl=()=>$('#cl',el).innerHTML=`<li class="${S.d.pair?'done':''}">Zwei verschiedene Wörter, gleiche Prüfsumme.</li><li class="${S.d.pairBonus?'done':''}">Profi: Die Wörter sind keine Buchstabendreher voneinander.</li>`;
+   const u=()=>{const a=normWort($('#a',el).value).replace(/ /g,''),b=normWort($('#b',el).value).replace(/ /g,'');$('#a',el).value=a;$('#b',el).value=b;
+    $('#la',el).innerHTML=lettersHtml(a);$('#lb',el).innerHTML=lettersHtml(b);
+    if(a.length<2||b.length<2){$('#fb',el).innerHTML='';return;}
+    if(a===b){$('#fb',el).innerHTML='<p class="bad">Das ist zweimal dasselbe Wort.</p>';return;}
+    if(letterSum(a).sum!==letterSum(b).sum){$('#fb',el).innerHTML=`<p class="muted">Die Summen unterscheiden sich um ${Math.abs(letterSum(a).sum-letterSum(b).sum)}. Diese Veränderung würde auffallen.</p>`;return;}
+    const an=isAnagram(a,b);if(!S.d.pair||!an){S.d.pair=[a,b];}if(!an)S.d.pairBonus=true;
+    $('#fb',el).innerHTML=`<p class="ok">Geschafft: Beide Wörter haben die Prüfsumme ${letterSum(a).sum}. ${an?'Das ist ein Buchstabendreher. Schaffst du es auch ohne?':'Und das ganz ohne Buchstabendreher.'}</p>
+     <div class="merke"><b>So machen es die Profis</b>Echte Systeme verwenden Verfahren wie SHA-256. Dort führt jede kleinste Änderung zu einem völlig anderen Ergebnis:<div class="akte" style="margin-top:.5rem">${a}\n${sha256(a)}\n\n${b}\n${sha256(b)}</div></div>`;
+    cl();nav();};
+   $('#a',el).oninput=u;$('#b',el).oninput=u;if(S.d.pair){$('#a',el).value=S.d.pair[0];$('#b',el).value=S.d.pair[1];u();}cl();},
+  done:()=>!!S.d.pair,hint:'Finde ein Wortpaar mit gleicher Prüfsumme.'}
+ ]},
+{n:6,kap:'Kapitel 4.3',title:'Vertraulichkeit: Wer darf was?',
+ talk:['Warum darf der Hausmeister nicht ins Klassenbuch?','Gibt es Daten, bei denen ein Schreibrecht ohne Leserecht sinnvoll ist?','Was macht ein Passwort stärker: mehr Länge oder mehr Sonderzeichen?','Was, wenn jemand die Daten unterwegs abfängt oder die Festplatte stiehlt?'],
+ knobel:'Diese Nachricht ist verschlüsselt: JHKHLP. Jeder Buchstabe wurde im Alphabet um gleich viele Stellen verschoben. Findest du heraus, was dort steht?',
+ code:()=>null,
+ steps:[
+ {t:'Experiment: Unterwegs im Schulnetz',
+  html:()=>`<p>Das dritte Schutzziel ist die <strong>Vertraulichkeit</strong>: Daten sollen nur befugten Personen zugänglich sein. Das erreicht man durch Verschlüsselung und durch Zugriffsbeschränkung. Jede Person meldet sich mit ihrem Benutzerkonto an. Eine <strong>Rechteverwaltung</strong> ordnet alle Benutzenden in Gruppen und regelt, wer welche Daten lesen und wer sie auch ändern darf (<strong>Schreibrecht</strong>).</p>
+  <div class="auftrag"><b>Auftrag</b>Melde dich mit verschiedenen Rollen an und teste, was du darfst.<ul class="checklist" id="cl"></ul></div>
+  <div class="two"><div class="panel"><h3>Angemeldet als</h3><div class="chips" id="roles"></div><div id="files" style="margin-top:.8rem"></div></div>
+   <div><h3>Protokoll</h3><div class="log" id="log">Noch keine Zugriffe.</div></div></div>`,
+  mount(el){const ROL=['Schüler','Lehrer','Hausmeister','Administrator'],F=['Hausaufgaben','Vertretungsplan','Klassenbuch','Raumliste','Bestellliste'];
+   const R=[[1,2,0,2],[1,0,0,2],[0,2,0,2],[0,0,2,2],[0,0,2,2]];let role=0;const N=S.d.net,log=[];
+   const cl=()=>$('#cl',el).innerHTML=['Lies als Schüler den Vertretungsplan.','Versuche als Schüler, das Klassenbuch zu ändern.','Finde heraus, welche Rolle (außer dem Administrator) die Bestellliste ändern darf.','Ändere das Klassenbuch als Administrator. Was darf er noch alles?'].map((t,i)=>`<li class="${N[i]?'done':''}">${t}</li>`).join('');
+   const draw=()=>{$('#roles',el).innerHTML=ROL.map((r,i)=>`<button class="chip${i===role?' on':''}" data-r="${i}">${r}</button>`).join('');
+    $$('#roles button',el).forEach(b=>b.onclick=()=>{role=+b.dataset.r;draw();});
+    $('#files',el).innerHTML=F.map((f,i)=>`<div class="case" style="padding:.35rem 0"><p>${f}</p><span><button class="btn ghost small" data-f="${i}" data-a="1">Öffnen</button> <button class="btn ghost small" data-f="${i}" data-a="2">Ändern</button></span></div>`).join('');
+    $$('#files button',el).forEach(b=>b.onclick=()=>{const f=+b.dataset.f,a=+b.dataset.a,ok=R[f][role]>=a;
+     log.unshift(`${ok?'✅ erlaubt  ':'⛔ verweigert'} ${ROL[role]} → ${F[f]} ${a===1?'öffnen':'ändern'}`);$('#log',el).innerHTML=log.map(esc).join('<br>');
+     if(role===0&&f===1&&a===1)N[0]=true;if(role===0&&f===2&&a===2)N[1]=true;if(role===2&&f===4&&a===2)N[2]=true;if(role===3&&f===2&&a===2)N[3]=true;cl();nav();});};
+   draw();cl();},
+  done:()=>S.d.net.every(Boolean),hint:'Erledige alle vier Punkte.'},
+ {t:'Experiment: Rechte selbst vergeben',
+  html:()=>`<p>Im Schulnetz kommen zwei neue Dateien dazu: die <strong>Notenliste</strong> der 10b und der <strong>Mensaplan</strong> (den schreibt die Küche über das Administratorkonto). Du bist jetzt der Administrator.</p>
+  <div class="auftrag"><b>Auftrag</b>Vergib die Rechte für beide Dateien und teste sie. Faustregel: Jede Gruppe bekommt nur so viele Rechte, wie sie für ihre Aufgabe braucht.</div>
+  <table class="t"><tr><th></th><th>Schüler</th><th>Lehrer</th><th>Hausmeister</th></tr>
+   ${['Notenliste','Mensaplan'].map((f,fi)=>`<tr><th>${f}</th>${[0,1,2].map(r=>`<td>${sel('rm'+(fi*3+r),['bitte wählen','kein Zugriff','Lesen','Lesen & Schreiben'],S.d.rm[fi*3+r]+1)}</td>`).join('')}</tr>`).join('')}</table>
+  <p style="margin-top:.8rem"><button class="btn" id="test">Rechte testen</button></p><div id="fb"></div>`,
+  mount(el){const M=S.d.rm;for(let i=0;i<6;i++)$('#rm'+i,el).onchange=e=>{M[i]=+e.target.value-1;save();};
+   const T=[['Ein Schüler will die Noten der ganzen Klasse lesen.',false,()=>M[0]>=1],['Eine Lehrerin trägt eine Note ein.',true,()=>M[1]===2],['Der Hausmeister öffnet die Notenliste.',false,()=>M[2]>=1],
+    ['Eine Schülerin sieht nach, was es heute zu essen gibt.',true,()=>M[3]>=1],['Ein Schüler trägt für jeden Tag Pizza ein.',false,()=>M[3]===2],['Ein Lehrer liest den Mensaplan.',true,()=>M[4]>=1],['Der Hausmeister liest den Mensaplan.',true,()=>M[5]>=1]];
+   const fb=()=>{let all=true;$('#fb',el).innerHTML=`<table class="t"><tr><th>Test</th><th>Soll</th><th>Dein System</th></tr>${T.map(t=>{const is=t[2](),ok=is===t[1];if(!ok)all=false;return `<tr><td>${t[0]}</td><td>${t[1]?'erlaubt':'verweigert'}</td><td class="${ok?'ok':'bad'}">${is?'erlaubt':'verweigert'} ${ok?'✓':'✗'}</td></tr>`;}).join('')}</table>${all?'<p class="ok" style="margin-top:.6rem">Alle Tests bestanden. Deine Rechteverwaltung schützt die Vertraulichkeit.</p>':'<p class="bad" style="margin-top:.6rem">Noch nicht sicher. Passe die Rechte an und teste erneut.</p>'}`;S.d.rmok=S.d.rmok||all;nav();};
+   $('#test',el).onclick=()=>{if(M.some(v=>v<0)){$('#fb',el).innerHTML='<p class="bad">Wähle erst für alle sechs Felder ein Recht.</p>';return;}fb();};if(S.d.rmok)fb();},
+  done:()=>S.d.rmok,hint:'Alle Tests müssen bestehen.'},
+ {t:'Experiment: Das Passwort-Labor',
+  html:()=>`<p>Die beste Rechteverwaltung nützt nichts, wenn das Konto schlecht geschützt ist. Zentral sind ein sicheres Passwort und möglichst eine <strong>Zwei-Faktor-Authentifizierung</strong>: Zum Passwort kommt ein zweiter Faktor, etwa ein Code auf dem Handy.</p>
+  <p class="bad small">Wichtig: Gib hier niemals ein echtes Passwort ein. Denke dir etwas aus.</p>
+  <div class="auftrag"><b>Auftrag</b><ul class="checklist" id="cl"></ul></div>
+  <div class="two" style="grid-template-columns:1fr 1fr"><div class="panel"><h3>1 · PIN-Knacker</h3><p class="small">Denke dir eine vierstellige PIN aus. Der Angreifer probiert einfach alle durch.</p>
+    <input type="text" id="pin" maxlength="4" inputmode="numeric" placeholder="0000" style="width:6rem;font-family:var(--mono)"> <button class="btn small stop" id="crack">Angriff starten</button>
+    <div class="pin" id="pv">----</div><p class="small" id="pf"></p></div>
+   <div class="panel"><h3>2 · Passwort-Rechner</h3><label class="row">Länge: <b id="lv"></b><input type="range" id="len" min="4" max="16" value="${S.d.pw.len}"></label>
+    ${['Kleinbuchstaben (26)','Großbuchstaben (26)','Ziffern (10)','Sonderzeichen (32)'].map((t,i)=>`<label style="display:block"><input type="checkbox" id="set${i}"${S.d.pw.sets[i]?' checked':''}> ${t}</label>`).join('')}
+    <div id="pwres" style="margin-top:.6rem"></div></div></div>
+  <div class="panel" style="margin-top:1rem"><h3>3 · Der zweite Faktor</h3><p class="small">Angenommen, ein Angreifer hat dein Passwort doch herausgefunden.</p><button class="btn small stop" id="tfa">Als Angreifer anmelden</button><div id="tfares" class="log" style="margin-top:.6rem;min-height:0"></div></div>`,
+  mount(el){const d=S.d,P=d.pw;
+   const cl=()=>$('#cl',el).innerHTML=`<li class="${d.pin?'done':''}">Lass eine vierstellige PIN knacken.</li><li class="${d.strong?'done':''}">Finde im Rechner eine Einstellung, die länger als 100 Jahre standhält. Was hilft mehr: Länge oder Zeichenarten?</li><li class="${d.tfa?'done':''}">Teste, was der zweite Faktor bringt.</li>`;
+   $('#crack',el).onclick=()=>{const v=$('#pin',el).value;if(!/^\d{4}$/.test(v)){$('#pf',el).innerHTML='<span class="bad">Bitte genau vier Ziffern.</span>';return;}
+    const target=+v;let n=0;const t0=performance.now();$('#pf',el).textContent='';
+    const tick=()=>{n=Math.min(target,n+97);$('#pv',el).textContent=String(n).padStart(4,'0');
+     if(n<target)requestAnimationFrame(tick);else{$('#pf',el).innerHTML=`<span class="bad">Geknackt nach ${target+1} Versuchen.</span> Hier dauerte es ${((performance.now()-t0)/1000).toFixed(1)} Sekunden, weil du zusehen sollst. Ein echter Rechner braucht dafür weniger als eine Tausendstelsekunde.`;d.pin=true;cl();nav();}};
+    tick();};
+   const dauer=s=>{if(s<1)return'weniger als 1 Sekunde';let v=s;for(const [f,n] of [[60,'Sekunden'],[60,'Minuten'],[24,'Stunden'],[365,'Tage']]){if(v<f)return'ca. '+Math.round(v)+' '+n;v/=f;}
+    if(v<1e3)return'ca. '+Math.round(v)+' Jahre';if(v<1e6)return'ca. '+Math.round(v/1e3)+' Tausend Jahre';if(v<1e9)return'ca. '+Math.round(v/1e6)+' Millionen Jahre';if(v<1e12)return'ca. '+Math.round(v/1e9)+' Milliarden Jahre';return'länger, als das Universum alt ist';};
+   const pw=()=>{P.len=+$('#len',el).value;P.sets=[0,1,2,3].map(i=>$('#set'+i,el).checked);$('#lv',el).textContent=P.len+' Zeichen';
+    const z=[26,26,10,32].reduce((a,n,i)=>a+(P.sets[i]?n:0),0);if(!z){$('#pwres',el).innerHTML='<p class="bad">Wähle mindestens eine Zeichenart.</p>';return;}
+    const combos=Math.pow(z,P.len),sec=combos/1e9;if(sec>100*365*86400)d.strong=true;
+    $('#pwres',el).innerHTML=`<div class="stats"><div class="stat"><b>${z}</b><span>mögliche Zeichen</span></div><div class="stat"><b>${combos<1e15?combos.toLocaleString('de-DE'):combos.toExponential(1).replace('.',',').replace('e+',' · 10^')}</b><span>mögliche Passwörter (${z}<sup>${P.len}</sup>)</span></div></div><p>Ein Rechner, der 1 Milliarde Passwörter pro Sekunde probiert, braucht höchstens: <b>${dauer(sec)}</b></p>`;cl();nav();};
+   $('#len',el).oninput=pw;[0,1,2,3].forEach(i=>$('#set'+i,el).onchange=pw);
+   $('#tfa',el).onclick=()=>{d.tfa=true;$('#tfares',el).innerHTML='Benutzername: m.muster<br>Passwort: ********  ✅ korrekt<br>Bitte gib den sechsstelligen Code aus deiner App ein: ______<br>⛔ Der Angreifer hat das Handy nicht. Anmeldung abgebrochen.';cl();nav();};
+   cl();pw();if(d.tfa)$('#tfa',el).onclick();},
+  done:()=>S.d.pin&&S.d.strong&&S.d.tfa,hint:'Erledige alle drei Punkte.'}
+ ]}
+];
+
+// ---------- Rahmen ----------
+function drawRail(){
+  $('#rail').innerHTML=STAGES.map((st,i)=>{const n=i+1,done=n<S.unlocked,cur=n===S.stage;
+    return (i?`<span class="seg${n<=S.unlocked?' done':''}${i===3?' gap':''}"></span>`:'')+`<button class="${done?'done':''}${cur?' cur':''}" ${n>S.unlocked?'disabled':''} data-n="${n}" title="Etappe ${n}: ${st.title}" aria-label="Etappe ${n}: ${st.title}">${n}</button>`;}).join('');
+  $$('#rail button').forEach(b=>b.onclick=()=>{S.stage=+b.dataset.n;render();});
+}
+function cur(){const st=STAGES[S.stage-1];return{st,i:Math.min(S.step[S.stage]||0,st.steps.length)};}
+function nav(){save();const {st,i}=cur(),nx=$('#next');if(!nx||i>=st.steps.length)return;const sp=st.steps[i],ok=!sp.done||sp.done();nx.disabled=!ok;$('#navhint').textContent=ok?'':sp.hint||'';}
+function render(){
+  save();drawRail();const {st,i}=cur(),main=$('#main');window.scrollTo(0,0);
+  const head=`<div class="eyebrow">Etappe ${st.n} von 6 · ${st.kap}</div><h1>${st.title}</h1>`;
+  if(i>=st.steps.length){renderStop(st,main,head);return;}
+  const sp=st.steps[i];
+  main.innerHTML=head+`<div class="steps">${st.steps.map((_,k)=>`<span class="${k<=i?'on':''}"></span>`).join('')}<span></span></div>
+   <section class="card"><h2>${sp.t}</h2>${sp.html()}</section>
+   <div class="nav"><button class="btn ghost" id="back"${i===0?' disabled':''}>Zurück</button><span id="navhint"></span><button class="btn" id="next">${i===st.steps.length-1?'Zum Stopp':'Weiter'}</button></div>`;
+  sp.mount&&sp.mount(main);
+  $('#back').onclick=()=>{S.step[S.stage]=i-1;render();};
+  $('#next').onclick=()=>{S.step[S.stage]=i+1;render();};
+  nav();
+}
+function renderStop(st,main,head){
+  const code=st.code(),last=st.n===6,open=S.unlocked>st.n;
+  main.innerHTML=head+`<section class="card stopcard"><div class="stophead"><div class="octa">STOPP</div><div><h2>${last?'Ziel erreicht':'Hier geht es gemeinsam weiter'}</h2><p style="margin:0">${last?'Du hast alle sechs Etappen geschafft. Gleich sprechen wir ein letztes Mal.':'Etappe '+st.n+' ist geschafft. Warte auf das Gespräch in der Klasse.'}</p></div></div>
+   ${code?`<h3>Dein Ergebnis-Code</h3><div class="code bigcode">${esc(code)}</div><p class="small muted">Halte ihn bereit. Wenn du dein Ergebnis zeigen sollst, sagst du diesen Code an.</p>`:''}
+   <h3>Darüber sprechen wir gleich</h3><ul>${st.talk.map(t=>`<li>${t}</li>`).join('')}</ul>
+   <div class="auftrag"><b>Schon fertig? Für die Wartezeit</b>${st.knobel}</div>
+   ${last?'<div class="merke"><b>Merke</b>Die <strong>Schutzziele</strong> der Datensicherheit sind <strong>Verfügbarkeit</strong>, <strong>Unversehrtheit</strong> und <strong>Vertraulichkeit</strong>. Backups schützen vor Datenverlust, Prüfsummen machen Veränderungen sichtbar, Zugriffssteuerung und Verschlüsselung sichern die Vertraulichkeit, sofern die Konten durch gute Passwörter geschützt sind.</div><p><b>Ausblick:</b> Wie man Daten so verpackt, dass nur Befugte sie lesen können, ist unser nächstes Thema: Verschlüsselung.</p>'
+    :open?`<p><button class="btn" id="go">Weiter zu Etappe ${st.n+1}</button></p>`
+    :`<h3>Freischaltwort</h3><p class="small muted" style="margin:0">Nach dem Gespräch bekommst du das Wort für die nächste Etappe.</p><form class="unlock" id="uf"><input type="text" id="word" autocomplete="off" aria-label="Freischaltwort"><button class="btn stop">Freischalten</button><span id="ufb"></span></form>`}
+   </section><div class="nav"><button class="btn ghost" id="back">Zurück zum Experiment</button><span></span></div>`;
+  $('#back').onclick=()=>{S.step[S.stage]=st.steps.length-1;render();};
+  const go=()=>{S.unlocked=Math.max(S.unlocked,st.n+1);S.stage=st.n+1;render();};
+  if($('#go'))$('#go').onclick=go;
+  if($('#uf'))$('#uf').onsubmit=e=>{e.preventDefault();if(wordHash($('#word').value)===UNLOCK[st.n-1])go();else $('#ufb').innerHTML='<span class="bad">Das ist nicht das richtige Wort.</span>';};
+}
+$('#reset').onclick=()=>{if(confirm('Wirklich den gesamten Fortschritt löschen und von vorn beginnen?')){try{localStorage.removeItem(KEY);}catch(e){}load();render();}};
+load();render();
+</script>
+</body>
+</html>
