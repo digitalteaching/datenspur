@@ -135,7 +135,7 @@ footer button{font:inherit;background:none;border:0;color:inherit;text-decoratio
   <nav class="rail" id="rail" aria-label="Etappen"></nav>
 </header>
 <main id="main"></main>
-<footer>Datenspur · Datenschutz und Datensicherheit · Dein Fortschritt wird nur in diesem Browser gespeichert. <button id="reset">Fortschritt zurücksetzen</button></footer>
+<footer>Datenspur · Datenschutz und Datensicherheit · Dein Fortschritt wird nur in diesem Browser gespeichert. Auf einem anderen Gerät tippst du oben einfach die Etappe an, bei der du warst. <button id="reset">Fortschritt zurücksetzen</button></footer>
 
 <script>
 /*SHARED-START*/
@@ -634,8 +634,9 @@ const STAGES=[
 // ---------- Rahmen ----------
 function drawRail(){
   $('#rail').innerHTML=STAGES.map((st,i)=>{const n=i+1,done=n<S.unlocked,cur=n===S.stage;
-    return (i?`<span class="seg${n<=S.unlocked?' done':''}${i===3?' gap':''}"></span>`:'')+`<button class="${done?'done':''}${cur?' cur':''}" ${n>S.unlocked?'disabled':''} data-n="${n}" title="Etappe ${n}: ${st.title}" aria-label="Etappe ${n}: ${st.title}">${n}</button>`;}).join('');
-  $$('#rail button').forEach(b=>b.onclick=()=>{S.stage=+b.dataset.n;render();});
+    return (i?`<span class="seg${n<=S.unlocked?' done':''}${i===3?' gap':''}"></span>`:'')+`<button class="${done?'done':''}${cur?' cur':''}" data-n="${n}" title="Etappe ${n}: ${st.title}" aria-label="Etappe ${n}: ${st.title}">${n}</button>`;}).join('');
+  // Alle Etappen sind direkt anwählbar, damit man auf einem anderen Gerät (zu Hause) dort weitermachen kann, wo man aufgehört hat.
+  $$('#rail button').forEach(b=>b.onclick=()=>{const n=+b.dataset.n;S.stage=n;S.unlocked=Math.max(S.unlocked,n);render();});
 }
 function cur(){const st=STAGES[S.stage-1];return{st,i:Math.min(S.step[S.stage]||0,st.steps.length)};}
 function nav(){save();const {st,i}=cur(),nx=$('#next');if(!nx||i>=st.steps.length)return;const sp=st.steps[i],ok=!sp.done||sp.done();nx.disabled=!ok;$('#navhint').textContent=ok?'':sp.hint||'';}
@@ -660,7 +661,7 @@ function renderStop(st,main,head){
    <div class="auftrag"><b>Schon fertig? Für die Wartezeit</b>${st.knobel}</div>
    ${last?'<div class="merke"><b>Merke</b>Die <strong>Schutzziele</strong> der Datensicherheit sind <strong>Verfügbarkeit</strong>, <strong>Unversehrtheit</strong> und <strong>Vertraulichkeit</strong>. Backups schützen vor Datenverlust, Prüfsummen machen Veränderungen sichtbar, Zugriffssteuerung und Verschlüsselung sichern die Vertraulichkeit, sofern die Konten durch gute Passwörter geschützt sind.</div><p><b>Ausblick:</b> Wie man Daten so verpackt, dass nur Befugte sie lesen können, ist unser nächstes Thema: Verschlüsselung.</p>'
     :open?`<p><button class="btn" id="go">Weiter zu Etappe ${st.n+1}</button></p>`
-    :`<h3>Freischaltwort</h3><p class="small muted" style="margin:0">Nach dem Gespräch bekommst du das Wort für die nächste Etappe.</p><form class="unlock" id="uf"><input type="text" id="word" autocomplete="off" aria-label="Freischaltwort"><button class="btn stop">Freischalten</button><span id="ufb"></span></form>`}
+    :`<h3>Freischaltwort</h3><p class="small muted" style="margin:0">Nach dem Gespräch bekommst du das Wort für die nächste Etappe.</p><form class="unlock" id="uf"><input type="text" id="word" autocomplete="off" aria-label="Freischaltwort"><button class="btn stop">Freischalten</button><span id="ufb"></span></form><p class="small muted">Zu Hause: Tippe oben auf die Zahl ${st.n+1}, um weiterzumachen.</p>`}
    </section><div class="nav"><button class="btn ghost" id="back">Zurück zum Experiment</button><span></span></div>`;
   $('#back').onclick=()=>{S.step[S.stage]=st.steps.length-1;render();};
   const go=()=>{S.unlocked=Math.max(S.unlocked,st.n+1);S.stage=st.n+1;render();};
